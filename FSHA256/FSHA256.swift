@@ -13,7 +13,7 @@ struct FSHA256 {
 
     fileprivate struct Constants {
         static let digestSize = 256
-        static let chunckSize = 512
+        static let chunkSize = 512
         static let hashValue: [UInt32] = [
             0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
             0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
@@ -99,9 +99,9 @@ struct FSHA256 {
     
     private func paddInput(_ inp: [Byte]) -> [Byte] {
         return ({ (_ : Void) -> Int in
-                    inp.count * 8 % Constants.chunckSize
+                    inp.count * 8 % Constants.chunkSize
                 } --> { (mod: Int) -> Int in
-                    mod < 448 ? 448 - 1 - mod : Constants.chunckSize + 448 - mod - 1
+                    mod < 448 ? 448 - 1 - mod : Constants.chunkSize + 448 - mod - 1
                 } --> { (toAppend: Int) -> [Byte] in
                     inp + [0x80] + [UInt8](repeating: 0, count: (toAppend - 7) / 8)
                 } --> { (appended: [Byte]) -> [Byte] in
@@ -121,8 +121,8 @@ struct FSHA256 {
     }
 
     private func getBlocks(_ inp: [Byte]) -> [[Byte]] {
-        return stride(from: 0, to: inp.count, by: Constants.chunckSize / 8).map {
-            Array(inp[$0 ..< min($0 + Constants.chunckSize / 8, inp.count)])
+        return stride(from: 0, to: inp.count, by: Constants.chunkSize / 8).map {
+            Array(inp[$0 ..< min($0 + Constants.chunkSize / 8, inp.count)])
         }
     }
     
@@ -158,8 +158,8 @@ struct FSHA256 {
 
 // MARK: - Functional helpers
 
-fileprivate precedencegroup Group { associativity: left }
-fileprivate infix operator -->: Group
+precedencegroup Group { associativity: left }
+infix operator -->: Group
 
 fileprivate func --> <T, U, V>(left: @escaping (T) -> U, right: @escaping (U) -> V) -> (T) -> V {
     return { right(left($0)) }
@@ -180,7 +180,7 @@ fileprivate func switchCaseRange(_ cases: [(range: CountableClosedRange<Int>, va
 }
 
 // MARK: - Shift op
-fileprivate infix operator >>> : BitwiseShiftPrecedence
+infix operator >>> : BitwiseShiftPrecedence
 fileprivate func >>> (lhs:UInt32, rhs:UInt32) -> UInt32 {
     return lhs >> rhs | lhs << (32-rhs)
 }
